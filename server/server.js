@@ -4,9 +4,13 @@ const Basic = require('hapi-auth-basic');
 const Bcrypt = require('bcrypt');
 const path = require('path');
 const Boom = require('boom');
+const Hoek = require('hoek');
+const Util = require('./util');
 const Vision = require('vision');
 
 const server = new Hapi.Server();
+const util = new Util();
+
 server.connection({ port: 3000 });
 
 const users = {
@@ -19,6 +23,7 @@ const users = {
 };
 
 const validate = function (request, username, password, callback) {
+    server.log(['info'], 'Validating ' + username);
     const user = users[username];
     if (!user) {
         return callback(null, false);
@@ -44,6 +49,7 @@ server.register(Basic, (err) => {
         config: {
             auth: 'simple',
             handler: function (request, reply) {
+                server.log(['info'], 'Saying hello to ' + request.params.name);
                 reply('Hello, ' + encodeURIComponent(request.params.name) + '!');
             }
         }
@@ -56,9 +62,11 @@ server.route({
     config: {
         auth: false,
         handler: function (request, reply) {
-            throw new Error('Big Error');
+            //throw new Error('Big Error');
+            //var message = 'Error: Not Implemented error.';
+            //util.logError(server, request, message, Hoek.displayStack());
             //reply(Boom.notImplemented('Not Implemented.'));
-            //reply('Hello, World!');
+            reply('Hello, World!');
         }
     }
 });
@@ -84,17 +92,14 @@ server.register({
             console: [{
                 module: 'good-squeeze',
                 name: 'Squeeze',
-                args: [{
-                    response: '*',
-                    log: '*'
-                }]
+                args: [{ response: '*', log: '*' }]
             }, {
                 module: 'good-console'
             }, 'stdout'],
             file: [{
                 module: 'good-squeeze',
                 name: 'Squeeze',
-                args: [{ error: '*' }]
+                args: [{ error: '*', log: 'error' }]
             }, {
                 module: 'good-squeeze',
                 name: 'SafeJson',
