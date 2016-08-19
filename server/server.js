@@ -2,6 +2,8 @@ const Hapi = require('hapi');
 const Good = require('good');
 const Basic = require('hapi-auth-basic');
 const Bcrypt = require('bcrypt');
+const path = require('path');
+const Boom = require('boom');
 const Vision = require('vision');
 
 const server = new Hapi.Server();
@@ -32,7 +34,7 @@ server.register(Basic, (err) => {
         throw err;
     }
 
-    server.auth.strategy('simple', 'basic', {
+    server.auth.strategy('simple', 'basic', 'required', {
         validateFunc: validate
     });
 
@@ -51,8 +53,13 @@ server.register(Basic, (err) => {
 server.route({
     method: 'GET',
     path: '/',
-    handler: function (request, reply) {
-        reply('Hello, World!');
+    config: {
+        auth: false,
+        handler: function (request, reply) {
+            throw new Error('Big Error');
+            //reply(Boom.notImplemented('Not Implemented.'));
+            //reply('Hello, World!');
+        }
     }
 });
 
@@ -83,7 +90,18 @@ server.register({
                 }]
             }, {
                 module: 'good-console'
-            }, 'stdout']
+            }, 'stdout'],
+            file: [{
+                module: 'good-squeeze',
+                name: 'Squeeze',
+                args: [{ error: '*' }]
+            }, {
+                module: 'good-squeeze',
+                name: 'SafeJson',
+            }, {
+                module: path.join(__dirname, './good-human.js'),
+                args: ['./error.log']
+            }]
         }
     }
 }, (err) => {
