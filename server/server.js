@@ -63,10 +63,21 @@ server.route({
         auth: false,
         handler: function (request, reply) {
             //throw new Error('Big Error');
-            //var message = 'Error: Not Implemented error.';
-            //util.logError(server, request, message, Hoek.displayStack());
-            //reply(Boom.notImplemented('Not Implemented.'));
             reply('Hello, World!');
+        }
+    }
+});
+
+server.route({
+    method: 'GET',
+    path: '/notImplemented',
+    config: {
+        auth: false,
+        handler: function (request, reply) {
+            //throw new Error('Big Error');
+            var message = 'Error: Not Implemented error.';
+            util.logError(server, request, message, Hoek.displayStack());
+            reply(Boom.notImplemented('Not Implemented.'));
         }
     }
 });
